@@ -79,7 +79,7 @@ int main() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	int i = 0;
+	float offset = 0.1;
 	while (!glfwWindowShouldClose(window)) {
 		processInput(window);
 
@@ -87,12 +87,6 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		shader.use();
-
-		//float timeValue = glfwGetTime();
-		//float greenValue = (sin(timeValue) / 2.0) + 0.5;
-		//int unicolorLocation = glGetUniformLocation(shaderProgram, "unicolor");
-		//if (unicolorLocation == -1) std::cerr << "uniform not found" << std::endl;
-		//glUniform4f(unicolorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
