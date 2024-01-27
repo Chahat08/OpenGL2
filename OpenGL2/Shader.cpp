@@ -91,15 +91,19 @@ void Shader::del() {
 	glDeleteProgram(this->ID);
 }
 
+unsigned int Shader::getID() {
+	return this->ID;
+}
+
 void Shader::setBoolUniform(const std::string& name, bool value) const {
-	int uniformLocation = glGetUniformLocation(this->ID, name.c_str());
+	unsigned int uniformLocation = glGetUniformLocation(this->ID, name.c_str());
 	if (uniformLocation == -1)
 		std::cerr << "ERROR: Uniform " << name << " not found" << std::endl;
 	glUniform1i(uniformLocation, (int)value);
 }
 
 void Shader::setIntUniform(const std::string& name, int value) const {
-	int uniformLocation = glGetUniformLocation(this->ID, name.c_str());
+	unsigned int uniformLocation = glGetUniformLocation(this->ID, name.c_str());
 	if (uniformLocation == -1) {
 		std::cerr << "ERROR: Uniform " << name << " not found" << std::endl;
 	}
@@ -107,9 +111,17 @@ void Shader::setIntUniform(const std::string& name, int value) const {
 }
 
 void Shader::setFloatUniform(const std::string& name, float value) const {
-	int uniformLocation = glGetUniformLocation(this->ID, name.c_str());
+	unsigned int uniformLocation = glGetUniformLocation(this->ID, name.c_str());
 	if (uniformLocation == -1) {
 		std::cerr << "ERROR: Uniform " << name << " not found." << std::endl;
 	}
 	glUniform1f(uniformLocation, value);
+}
+
+void Shader::setUniformMatrix4float(const std::string& name, glm::mat4& transform) {
+	unsigned int transformLoc = glGetUniformLocation(this->ID, name.c_str());
+	if (transformLoc == -1) {
+		std::cerr << "Uniform matrix 4f " << name << " not found" << std::endl;
+	}
+	glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 }
