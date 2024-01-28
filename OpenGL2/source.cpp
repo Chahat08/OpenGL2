@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include "Shader.h"
+#include "Positions.h"
 
 
 const int SCREEN_WIDTH = 800;
@@ -20,6 +21,17 @@ void framebuffer_resize_callback(GLFWwindow* window, int width, int height) {
 void processInput(GLFWwindow* window) {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	}
+}
+
+void drawCube(Shader shader) {
+	for (int i = 0; i < 10; ++i) {
+		glm::mat4 model(1.0f);
+		model = glm::translate(model, cubePositions[i]);
+		model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0, 0.3, 0.5));
+		shader.setUniformMatrix4float("model", model);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 }
 
@@ -53,7 +65,7 @@ int main() {
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
 	std::cout << "max nr of vertex attribs supp: " << nrAttributes << std::endl;
 
-	const GLubyte* vendor = glGetString(GL_VENDOR); 
+	const GLubyte* vendor = glGetString(GL_VENDOR);
 	const GLubyte* renderer = glGetString(GL_RENDERER);
 	std::cout << "vendor: " << vendor << std::endl;
 	std::cout << "renderer: " << renderer << std::endl;
@@ -67,29 +79,19 @@ int main() {
 	//vec = trans * vec;
 	//std::cout << vec.x << " " << vec.y << " " << vec.z << std::endl;
 
-	float vertices[] = {
-		// positions          // colors           
-			 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,  // top right
-			 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,  // bottom right
-			-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,  // bottom left
-			-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,  // bottom left
-			-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   // top left 
-			 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,  // top right
-	};
-
 	unsigned int VBO, VAO;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
-	
+
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_DYNAMIC_DRAW);
 
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -104,21 +106,42 @@ int main() {
 	//unsigned int transformLoc = glGetUniformLocation(shader.getID(), "transform");
 	//glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
+	glm::mat4 model = glm::mat4(1.0f);
+	//model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+	glm::mat4 view = glm::mat4(1.0f);
+	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+	glm::mat4 projection = glm::mat4(1.0f);
+	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.f, 0.1f, 100.0f);
+
+	glEnable(GL_DEPTH_TEST);
 	while (!glfwWindowShouldClose(window)) {
 		processInput(window);
 
 		glClearColor(0.2f, 0.1f, 0.2f, 0.1f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glm::mat4 trans(1.0f); // identity matrix
-		trans = glm::translate(trans, glm::vec3(0.25f, 0.25f, 0.0f));
-		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		//glm::mat4 trans(1.0f); // identity matrix
+		//trans = glm::translate(trans, glm::vec3(0.25f, 0.25f, 0.0f));
+		//trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		/*glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, -0.5f));*/
+
+		glm::mat4 view = glm::mat4(1.0f);
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+		glm::mat4 projection = glm::mat4(1.0f);
+		projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.f, 0.1f, 100.0f);
 
 		shader.use();
-		shader.setUniformMatrix4float("transform", trans);
+		//shader.setUniformMatrix4float("model", model);
+		shader.setUniformMatrix4float("view", view);
+		shader.setUniformMatrix4float("projection", projection);
 
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		drawCube(shader);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
