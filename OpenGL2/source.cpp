@@ -24,7 +24,7 @@ void processInput(GLFWwindow* window) {
 	}
 }
 
-void drawCube(Shader shader) {
+void setCubeModelMatrices(Shader &shader) {
 	for (int i = 0; i < 10; ++i) {
 		glm::mat4 model(1.0f);
 		model = glm::translate(model, cubePositions[i]);
@@ -33,6 +33,20 @@ void drawCube(Shader shader) {
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
+}
+
+
+void setCameraViewMatrix(Shader &shader) {
+	const float radius = 30.0f;
+	float camX = sin(glfwGetTime()) * radius;
+	float camZ = cos(glfwGetTime()) * radius;
+	glm::mat4 view(glm::lookAt(
+		glm::vec3(camX, 0.0f, camZ),
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f)
+	));
+
+	shader.setUniformMatrix4float("view", view);
 }
 
 int main() {
@@ -106,20 +120,27 @@ int main() {
 	//unsigned int transformLoc = glGetUniformLocation(shader.getID(), "transform");
 	//glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
-	glm::mat4 model = glm::mat4(1.0f);
-	//model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	//glm::mat4 model = glm::mat4(1.0f);
+	////model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-	glm::mat4 view = glm::mat4(1.0f);
-	view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+	//glm::mat4 view = glm::mat4(1.0f);
+	//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
-	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.f, 0.1f, 100.0f);
+	//glm::mat4 projection = glm::mat4(1.0f);
+	//projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.f, 0.1f, 100.0f);
+
+	//glm::vec3 cameraPos(0.0f, 0.0f, 3.0f); // camera located 3.0f away from screen towards us
+	//glm::vec3 cameraTarget(0.0f, 0.0f, 0.0f); // camera looking at the origin
+	//glm::vec3 cameraDirection(glm::normalize(cameraPos - cameraTarget)); //vector from the camera to the target gives its direction
+	//glm::vec3 up(0.0f, 1.0f, 0.0f);
+	//glm::vec3 cameraRight(glm::normalize(glm::cross(up, cameraDirection)));
+	//glm::vec3 cameraUp(glm::cross(cameraDirection, cameraRight));
 
 	glEnable(GL_DEPTH_TEST);
 	while (!glfwWindowShouldClose(window)) {
 		processInput(window);
 
-		glClearColor(0.2f, 0.1f, 0.2f, 0.1f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//glm::mat4 trans(1.0f); // identity matrix
@@ -129,19 +150,19 @@ int main() {
 		/*glm::mat4 model = glm::mat4(1.0f);
 		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, -0.5f));*/
 
-		glm::mat4 view = glm::mat4(1.0f);
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		//glm::mat4 view = glm::mat4(1.0f);
+		//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
 		glm::mat4 projection = glm::mat4(1.0f);
 		projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.f, 0.1f, 100.0f);
 
 		shader.use();
 		//shader.setUniformMatrix4float("model", model);
-		shader.setUniformMatrix4float("view", view);
 		shader.setUniformMatrix4float("projection", projection);
 
 		glBindVertexArray(VAO);
-		drawCube(shader);
+		setCameraViewMatrix(shader);
+		setCubeModelMatrices(shader);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

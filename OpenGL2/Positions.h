@@ -46,6 +46,7 @@ float cubeVertices[] = {
 	-0.5,  0.5,-1.0,		0.0,0.0,1.0
 };
 
+// TODO: randomise locations
 glm::vec3 cubePositions[] = {
 	glm::vec3(2.0f, 5.0f, -10.0f),
 	glm::vec3(-3.1f, -1.0f, 2.0f),
